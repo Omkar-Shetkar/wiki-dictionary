@@ -80,6 +80,7 @@ function stripHtml(html) {
       popup.style.backgroundColor = "rgba(144, 238, 144, 0.90)"; // Semi-transparent green
       popup.style.color = "black"; // Font color set to black
       popup.style.border = "1px solid #ccc";
+      popup.style.borderRadius = "10px"; /* Add rounded edges */
       popup.style.padding = "10px";
       popup.style.zIndex = 1000;
       popup.style.maxWidth = `${maxWidth}px`;
