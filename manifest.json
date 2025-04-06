@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "Wiktionary Add-On",
+    "version": "1.0",
+    "description": "Shows word definitions and audio pronunciation using Wiktionary.",
+    "permissions": [
+      "activeTab",
+      "https://en.wiktionary.org/*"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+      }
+    ],
+    "web_accessible_resources": ["popup.html", "popup.css"]
+  }
+  

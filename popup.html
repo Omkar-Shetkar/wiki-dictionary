@@ -1,0 +1,7 @@
+popup.innerHTML = `
+  <strong>${selectedText}</strong> 
+  ${audioUrl ? `<i class="fas fa-volume-up"></i>` : ""}
+  ${audioUrl ? `<audio controls src="${audioUrl}"></audio>` : ""}
+  <br>
+  ${meanings}
+`;
