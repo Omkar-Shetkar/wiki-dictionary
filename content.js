@@ -40,25 +40,27 @@ function stripHtml(html) {
           if (usedPartsOfSpeech.has(entry.partOfSpeech)) {
             continue;
           }
-  
+
           let partOfSpeech = entry.partOfSpeech;
           let definition = stripHtml(entry.definitions[0].definition);
           let example = '';
-  
+
           if (entry.definitions[0].examples && entry.definitions[0].examples.length > 0) {
             example = `<br><span style="font-size: small; font-style: italic;">E.g: ${stripHtml(entry.definitions[0].examples[0])}</span>`;
           }
-  
+
           definitionList.push(`<span style="font-size: small; font-style: italic;">${partOfSpeech}:</span> ${definition}${example}`);
           usedPartsOfSpeech.add(partOfSpeech);
           definitionCount++;
-  
+
           if (definitionCount >= 2) {
             break;
           }
         }
-  
+
         meanings = definitionList.join("<br>");
+      } else {
+        meanings = "No definitions found for this word.";
       }
   
       // Calculate max pop-up dimensions
