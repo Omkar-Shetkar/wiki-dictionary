@@ -1,8 +1,7 @@
 function stripHtml(html) {
-    let tmp = document.createElement("DIV");
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || "";
-  }
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+}
   
   document.addEventListener("dblclick", async (event) => {
     const ctrlDoubleClick = await browser.storage.sync.get({ ctrlDoubleClick: false });

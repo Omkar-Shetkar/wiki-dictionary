@@ -23,7 +23,7 @@
       "page": "options.html",
       "open_in_tab": true
     },
-    "applications": {
+    "browser_specific_settings": {
       "gecko": {
         "id": "wiki-dictionary-addon@gmail.com"
       }
