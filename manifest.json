@@ -2,9 +2,10 @@
     "manifest_version": 2,
     "name": "Wiki Dictionary",
     "version": "1.0",
-    "description": "Shows word definitions using Wiktionary API",
+    "description": "Quickly view word definitions from Wiktionary by double-clicking. Supports Ctrl+Double Click option. Simple and Easy.",
     "permissions": [
       "activeTab",
+      "storage",
       "https://en.wiktionary.org/*"
     ],
     "content_scripts": [
