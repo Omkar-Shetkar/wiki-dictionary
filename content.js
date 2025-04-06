@@ -5,6 +5,12 @@ function stripHtml(html) {
   }
   
   document.addEventListener("dblclick", async (event) => {
+    const ctrlDoubleClick = await browser.storage.sync.get({ ctrlDoubleClick: false });
+
+    if (ctrlDoubleClick.ctrlDoubleClick && !event.ctrlKey) {
+        return;
+    }
+    
     const selectedText = window.getSelection().toString().trim();
     if (!selectedText) return;
   

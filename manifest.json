@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "Wiktionary Add-On",
+    "name": "Wiki Dictionary",
     "version": "1.0",
-    "description": "Shows word definitions and audio pronunciation using Wiktionary.",
+    "description": "Shows word definitions using Wiktionary API",
     "permissions": [
       "activeTab",
       "https://en.wiktionary.org/*"
@@ -13,6 +13,14 @@
         "js": ["content.js"]
       }
     ],
-    "web_accessible_resources": ["popup.html", "popup.css"]
+    "web_accessible_resources": ["popup.html", "popup.css"],
+    "icons": {
+      "48": "icons/icon_48.png",
+      "96": "icons/icon_96.png"
+    },
+    "options_ui": {
+      "page": "options.html",
+      "open_in_tab": true
+    }
   }
   
