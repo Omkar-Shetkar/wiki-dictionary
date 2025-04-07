@@ -1,32 +1,27 @@
 {
-    "manifest_version": 2,
-    "name": "Wiki Dictionary",
-    "version": "1.0.1",
-    "description": "Quickly view word definitions from Wiktionary by double-clicking. Supports Ctrl+Double Click option. Simple and Easy.",
-    "permissions": [
-      "activeTab",
-      "storage",
-      "https://en.wiktionary.org/*"
-    ],
-    "content_scripts": [
-      {
-        "matches": ["<all_urls>"],
-        "js": ["content.js"]
-      }
-    ],
-    "web_accessible_resources": ["popup.html", "popup.css"],
-    "icons": {
-      "48": "icons/icon_48.png",
-      "96": "icons/icon_96.png"
-    },
-    "options_ui": {
-      "page": "options.html",
-      "open_in_tab": true
-    },
-    "browser_specific_settings": {
-      "gecko": {
-        "id": "wiki-dictionary-addon@gmail.com"
-      }
+  "manifest_version": 2,
+  "name": "Wiki Dictionary",
+  "version": "1.0.2",
+  "description": "Quickly view word definitions from Wiktionary by double-clicking. Supports Ctrl+Double Click option. Simple and Easy.",
+  "permissions": ["activeTab", "storage", "https://en.wiktionary.org/*"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": ["popup.html", "popup.css"],
+  "icons": {
+    "48": "icons/icon_48.png",
+    "96": "icons/icon_96.png"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "wiki-dictionary-addon@gmail.com"
     }
   }
-  
+}
