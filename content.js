@@ -42,11 +42,21 @@ function stripHtml(html) {
           }
 
           let partOfSpeech = entry.partOfSpeech;
-          let definition = stripHtml(entry.definitions[0].definition);
+
+          let defEntry;
+          let definition;
+
+          for (const item of entry.definitions) {
+            definition = stripHtml(item.definition);
+            if (definition !== '') { defEntry = item; break; }
+          }
+
+          if (!defEntry) { continue; }
+
           let example = '';
 
-          if (entry.definitions[0].examples && entry.definitions[0].examples.length > 0) {
-            example = `<br><span style="font-size: small; font-style: italic;">E.g: ${stripHtml(entry.definitions[0].examples[0])}</span>`;
+          if (defEntry.examples && defEntry.examples.length > 0) {
+            example = `<br><span style="font-size: small; font-style: italic;">E.g: ${stripHtml(defEntry.examples[0])}</span>`;
           }
 
           definitionList.push(`<span style="font-size: small; font-style: italic;">${partOfSpeech}:</span> ${definition}${example}`);
