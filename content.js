@@ -3,6 +3,58 @@ function stripHtml(html) {
   return doc.body.textContent || "";
 }
 
+async function getPronunciationUrl(word) {
+  const parseApiUrl = `https://en.wiktionary.org/w/api.php?action=parse&page=${word}&prop=text&format=json`;
+
+  try {
+    const response = await fetch(parseApiUrl);
+    const parseData = await response.json();
+
+    if (parseData.error) {
+      console.error("Error parsing Wiktionary page:", parseData.error.info);
+      return null;
+    }
+
+    const htmlText = parseData.parse.text["*"];
+    const audioFileRegex = /<source[^>]*src="([^"]*\.(ogg|mp3))"[^>]*>/gi;
+    let match;
+    let audioUrls = [];
+
+    while ((match = audioFileRegex.exec(htmlText)) !== null) {
+      audioUrls.push(match[1]);
+    }
+
+    if (audioUrls.length === 0) {
+      return null;
+    }
+
+    // For simplicity, let's use the first audio URL found
+    const audioFileTitle = audioUrls[0].split('/').pop();
+    const imageUrlApiUrl = `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&titles=File:${audioFileTitle}&iiprop=url&format=json`;
+
+    const imageUrlResponse = await fetch(imageUrlApiUrl);
+    const imageUrlData = await imageUrlResponse.json();
+
+    if (imageUrlData.error) {
+      console.error("Error getting image info:", imageUrlData.error.info);
+      return null;
+    }
+
+    const pages = imageUrlData.query.pages;
+    const pageId = Object.keys(pages)[0];
+    if (pages[pageId].missing) {
+      console.error("Audio file not found.");
+      return null;
+    }
+
+    return pages[pageId].imageinfo[0].url;
+
+  } catch (error) {
+    console.error("Error fetching pronunciation URL:", error);
+    return null;
+  }
+}
+
 document.addEventListener("dblclick", async (event) => {
   const ctrlDoubleClick = await browser.storage.sync.get({
     ctrlDoubleClick: false,
@@ -85,6 +137,9 @@ document.addEventListener("dblclick", async (event) => {
       meanings = "No definitions found for this word.";
     }
 
+    // Get pronunciation URL
+    const pronunciationUrl = await getPronunciationUrl(selectedText);
+
     // Calculate max pop-up dimensions
     const maxWidth = window.innerWidth * 0.35;
     const maxHeight = window.innerHeight * 0.35;
@@ -92,11 +147,42 @@ document.addEventListener("dblclick", async (event) => {
     // Create and position the pop-up
     const popup = document.createElement("div");
     popup.id = "dictionary-popup";
-    popup.innerHTML = `
-        <strong>${selectedText}</strong>
-        <br>
-        ${meanings}
-      `;
+
+    // Create content elements
+    const title = document.createElement("strong");
+    title.textContent = selectedText;
+
+    // Create audio icon
+    const audioIcon = document.createElement("img");
+    audioIcon.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0 1.77-1.02 3.29-2.5 4.03v-8.07c1.48.73 2.5 2.25 2.5 4.04M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.28 7-8.77s-2.99-7.86-7-8.77z'%3E%3C/path%3E%3C/svg%3E";
+    audioIcon.style.width = "20px";
+    audioIcon.style.height = "20px";
+    audioIcon.style.cursor = "pointer";
+    audioIcon.style.marginLeft = "5px";
+    audioIcon.addEventListener("click", (event) => {
+      event.stopPropagation(); // Prevent the click from closing the popup
+      if (pronunciationUrl) {
+        new Audio(pronunciationUrl).play();
+      } else {
+        alert("Pronunciation not available.");
+      }
+    });
+
+    title.appendChild(audioIcon);
+    const lineBreak = document.createElement("br");
+    const meaningsDiv = document.createElement("div");
+    meaningsDiv.innerHTML = meanings;
+
+    // Append content to the popup
+    popup.appendChild(title);
+    popup.appendChild(lineBreak);
+    popup.appendChild(meaningsDiv);
+
+    // popup.innerHTML = `
+    //     <strong>${selectedText}</strong>
+    //     <br>
+    //     ${meanings}
+    //   `;
     popup.style.position = "absolute";
     popup.style.top = `${event.pageY}px`;
     popup.style.left = `${event.pageX}px`;
