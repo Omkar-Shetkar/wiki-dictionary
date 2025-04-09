@@ -152,23 +152,26 @@ document.addEventListener("dblclick", async (event) => {
     const title = document.createElement("strong");
     title.textContent = selectedText;
 
-    // Create audio icon
-    const audioIcon = document.createElement("img");
-    audioIcon.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0 1.77-1.02 3.29-2.5 4.03v-8.07c1.48.73 2.5 2.25 2.5 4.04M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.28 7-8.77s-2.99-7.86-7-8.77z'%3E%3C/path%3E%3C/svg%3E";
-    audioIcon.style.width = "20px";
-    audioIcon.style.height = "20px";
-    audioIcon.style.cursor = "pointer";
-    audioIcon.style.marginLeft = "5px";
-    audioIcon.addEventListener("click", (event) => {
-      event.stopPropagation(); // Prevent the click from closing the popup
-      if (pronunciationUrl) {
-        new Audio(pronunciationUrl).play();
-      } else {
-        alert("Pronunciation not available.");
-      }
-    });
+    // Append audio icon only if pronunciation URL is available
+    if (pronunciationUrl) {
+      // Create audio icon
+      const audioIcon = document.createElement("img");
+      audioIcon.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0 1.77-1.02 3.29-2.5 4.03v-8.07c1.48.73 2.5 2.25 2.5 4.04M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.28 7-8.77s-2.99-7.86-7-8.77z'%3E%3C/path%3E%3C/svg%3E";
+      audioIcon.style.width = "20px";
+      audioIcon.style.height = "20px";
+      audioIcon.style.cursor = "pointer";
+      audioIcon.style.marginLeft = "5px";
+      audioIcon.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent the click from closing the popup
+        if (pronunciationUrl) {
+          new Audio(pronunciationUrl).play();
+        } else {
+          alert("Pronunciation not available.");
+        }
+      });
 
-    title.appendChild(audioIcon);
+      title.appendChild(audioIcon);
+    }
     const lineBreak = document.createElement("br");
     const meaningsDiv = document.createElement("div");
     meaningsDiv.innerHTML = meanings;
