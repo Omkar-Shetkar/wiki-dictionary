@@ -16,7 +16,7 @@ async function makeApiCall(url) {
     performance.mark(endMark);
 
     const measure = performance.measure(`${url}_duration`, startMark, endMark);
-    console.log(`API call to ${url} took ${measure.duration.toFixed(2)}ms`);
+    // console.log(`API call to ${url} took ${measure.duration.toFixed(2)}ms`);
 
     return data;
   } catch (error) {
@@ -224,6 +224,6 @@ document.addEventListener("dblclick", async (event) => {
   } finally {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
-    console.log(`Total execution time: ${executionTime} milliseconds`);
+    // console.log(`Total execution time: ${executionTime} milliseconds`);
   }
 });
