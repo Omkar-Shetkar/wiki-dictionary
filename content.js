@@ -6,43 +6,34 @@ function stripHtml(html) {
 async function makeApiCall(url) {
   const startMark = `start_${url}`;
   const endMark = `end_${url}`;
-
   performance.mark(startMark);
-
   try {
     const response = await fetch(url);
     const data = await response.json();
-
     performance.mark(endMark);
-
     const measure = performance.measure(`${url}_duration`, startMark, endMark);
-    // console.log(`API call to ${url} took ${measure.duration.toFixed(2)}ms`);
-
     return data;
   } catch (error) {
     console.error(`Error calling ${url}:`, error);
     performance.mark(endMark);
     performance.measure(`${url}_duration`, startMark, endMark);
-    return null; // Propagate the error by returning null
+    return null;
   }
 }
 
 async function getPronunciationUrl(word) {
   const parseApiUrl = `https://en.wiktionary.org/w/api.php?action=parse&page=${word}&prop=text&format=json`;
-
   try {
     const parseData = await makeApiCall(parseApiUrl);
-
     if (!parseData || parseData.error) {
       console.error("Error parsing Wiktionary page:", parseData.error ? parseData.error.info : "API call failed");
       return null;
     }
 
     const htmlText = parseData.parse.text["*"];
-    const audioFileRegex = /<source[^>]*src="([^"]*\.(ogg|mp3))"[^>]*>/gi;
+    const audioFileRegex = /<audio.*?src="([^"]*\.(ogg|mp3))"[^>]*>/gi;
     let match;
     let audioUrls = [];
-
     while ((match = audioFileRegex.exec(htmlText)) !== null) {
       audioUrls.push(match[1]);
     }
@@ -51,12 +42,9 @@ async function getPronunciationUrl(word) {
       return null;
     }
 
-    // For simplicity, let's use the first audio URL found
     const audioFileTitle = audioUrls[0].split('/').pop();
     const imageUrlApiUrl = `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&titles=File:${audioFileTitle}&iiprop=url&format=json`;
-
     const imageUrlData = await makeApiCall(imageUrlApiUrl);
-
     if (!imageUrlData || imageUrlData.error) {
       console.error("Error getting image info:", imageUrlData.error ? imageUrlData.error.info : "API call failed");
       return null;
@@ -70,32 +58,16 @@ async function getPronunciationUrl(word) {
     }
 
     return pages[pageId].imageinfo[0].url;
-
   } catch (error) {
     console.error("Error fetching pronunciation URL:", error);
     return null;
   }
 }
 
-document.addEventListener("dblclick", async (event) => {
-  const startTime = performance.now();
-
-  const ctrlDoubleClick = await browser.storage.sync.get({
-    ctrlDoubleClick: false,
-  });
-
-  if (ctrlDoubleClick.ctrlDoubleClick && !(event.ctrlKey || event.metaKey)) {
-    return;
-  }
-
-  const selectedText = window.getSelection().toString().trim();
-  if (!selectedText) return;
-
+async function showDefinition(selectedText, event) {
   const definitionApiUrl = `https://en.wiktionary.org/api/rest_v1/page/definition/${selectedText}`;
-
   try {
     const definitionData = await makeApiCall(definitionApiUrl);
-
     if (!definitionData) {
       console.error("Failed to fetch definition data.");
       return;
@@ -115,7 +87,6 @@ document.addEventListener("dblclick", async (event) => {
       let usedPartsOfSpeech = new Set();
       let definitionCount = 0;
       let definitionList = [];
-
       for (const entry of englishDefinitions) {
         if (usedPartsOfSpeech.has(entry.partOfSpeech)) {
           continue;
@@ -124,7 +95,6 @@ document.addEventListener("dblclick", async (event) => {
         let partOfSpeech = entry.partOfSpeech;
         let defEntry;
         let definition;
-
         for (const item of entry.definitions) {
           definition = stripHtml(item.definition);
           if (definition !== "") {
@@ -138,23 +108,20 @@ document.addEventListener("dblclick", async (event) => {
         }
 
         let example = "";
-
         if (defEntry.examples && defEntry.examples.length > 0) {
-          example = `<br><span style="font-size: small; font-style: italic;">E.g: ${stripHtml(defEntry.examples[0])}</span>`;
+          example = `E.g: ${stripHtml(defEntry.examples[0])}`;
         }
 
         definitionList.push(
-          `<span style="font-size: small; font-style: italic;">${partOfSpeech}:</span> ${definition}${example}`
+          `${partOfSpeech}: ${definition}${example}`
         );
         usedPartsOfSpeech.add(partOfSpeech);
         definitionCount++;
-
         if (definitionCount >= 2) {
           break;
         }
       }
-
-      meanings = definitionList.join("<br>");
+      meanings = definitionList.join("<br><br>");
     } else {
       meanings = "No definitions found for this word.";
     }
@@ -162,7 +129,6 @@ document.addEventListener("dblclick", async (event) => {
     // Calculate max pop-up dimensions
     const maxWidth = window.innerWidth * 0.35;
     const maxHeight = window.innerHeight * 0.35;
-
     // Create and position the pop-up
     const popup = document.createElement("div");
     popup.id = "dictionary-popup";
@@ -178,11 +144,9 @@ document.addEventListener("dblclick", async (event) => {
     popup.style.maxWidth = `${maxWidth}px`;
     popup.style.maxHeight = `${maxHeight}px`;
     popup.style.overflow = "auto";
-
     // Create content elements
     const title = document.createElement("strong");
     title.textContent = selectedText;
-
     const lineBreak = document.createElement("br");
     const meaningsDiv = document.createElement("div");
     meaningsDiv.innerHTML = meanings;
@@ -190,6 +154,32 @@ document.addEventListener("dblclick", async (event) => {
     popup.appendChild(title);
     popup.appendChild(lineBreak);
     popup.appendChild(meaningsDiv);
+
+    // "Also See" Section
+    const alsoSeeDiv = document.createElement("div");
+    alsoSeeDiv.style.marginTop = "10px";
+    alsoSeeDiv.style.borderTop = "1px solid #ccc";
+    alsoSeeDiv.style.paddingTop = "5px";
+    const alsoSeeTitle = document.createElement("div");
+    alsoSeeTitle.style.fontWeight = "bold";
+    alsoSeeTitle.textContent = "Also See:";
+    alsoSeeDiv.appendChild(alsoSeeTitle);
+
+    const alternateCaseWord = selectedText[0] === selectedText[0].toUpperCase() ?
+      selectedText[0].toLowerCase() + selectedText.slice(1) :
+      selectedText[0].toUpperCase() + selectedText.slice(1);
+
+    const alternateCaseLink = document.createElement("a");
+    alternateCaseLink.href = "#";
+    alternateCaseLink.style.marginLeft = "5px";
+    alternateCaseLink.textContent = alternateCaseWord;
+    alternateCaseLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      popup.remove(); // Remove the current popup
+      showDefinition(alternateCaseWord, event); // Show definition for the alternate case word
+    });
+    alsoSeeDiv.appendChild(alternateCaseLink);
+    popup.appendChild(alsoSeeDiv);
 
     document.body.appendChild(popup);
 
@@ -218,12 +208,25 @@ document.addEventListener("dblclick", async (event) => {
       },
       { once: true }
     );
-
   } catch (error) {
     console.error("Error fetching data from Wiktionary:", error);
-  } finally {
-    const endTime = performance.now();
-    const executionTime = endTime - startTime;
-    // console.log(`Total execution time: ${executionTime} milliseconds`);
   }
+}
+
+document.addEventListener("dblclick", async (event) => {
+  const startTime = performance.now();
+  const ctrlDoubleClick = await browser.storage.sync.get({
+    ctrlDoubleClick: false,
+  });
+  if (ctrlDoubleClick.ctrlDoubleClick && !(event.ctrlKey || event.metaKey)) {
+    return;
+  }
+
+  const selectedText = window.getSelection().toString().trim();
+  if (!selectedText) return;
+
+  showDefinition(selectedText, event);
+
+  const endTime = performance.now();
+  const executionTime = endTime - startTime;
 });
