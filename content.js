@@ -179,7 +179,9 @@ async function showDefinition(selectedText, event) {
       showDefinition(alternateCaseWord, event); // Show definition for the alternate case word
     });
     alsoSeeDiv.appendChild(alternateCaseLink);
-    popup.appendChild(alsoSeeDiv);
+    if (englishDefinitions.length == 0) {
+      popup.appendChild(alsoSeeDiv);
+    }
 
     document.body.appendChild(popup);
 
