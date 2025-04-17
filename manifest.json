@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Wiki Dictionary",
-  "version": "1.2",
+  "version": "1.1.2",
   "description": "Quickly view word definitions from Wiktionary by double-clicking. Supports Ctrl+Double Click option. Simple and Easy.",
   "permissions": ["activeTab", "storage", "https://en.wiktionary.org/*", "https://commons.wikimedia.org/*"],
   "content_scripts": [
